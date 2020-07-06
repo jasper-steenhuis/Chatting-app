@@ -22,16 +22,14 @@ app.get('/', (req, res) => {
 });
 io.on('connection', (socket) => {
     console.log("a user has connected");
-
     socket.on('change_username', (data) => {
         socket.username = data.username
-        console.log(socket.username);
     });
-
     socket.on('new_message', (data) => {
-        io.sockets.emit('new_message', { message: data.message, username: socket.username });
-        console.log(socket.username);
-        console.log(data.username);
+        io.sockets.emit('new_message', { message: data.message, username: socket.username });  
+    });
+    socket.on('typing', (data) =>{
+        socket.broadcast.emit('typing', {username : socket.username});
     });
 
 });

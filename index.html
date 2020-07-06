@@ -54,6 +54,7 @@
 </head>
 
 <body>
+  <p id="feedback"></p>
   <ul id="messages"></ul>
   <form action="">
     <input id="m" autocomplete="off" /><button id="send_message">Send</button>
@@ -69,7 +70,11 @@
   <!-- Latest compiled JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
+  <script src="/chat.js"></script>
   <script>
+    $(window).on('load', function () {
+      $('#myModal').modal('show');
+    });
     var $canvas = $('#canvas'),
       $window = $(window);
 
@@ -77,21 +82,41 @@
       width: $window.width(),
       height: $window.height()
     });
-
-
-    $(window).on('load', function () {
-      $('#myModal').modal('show');
-    });
     $(function () {
 
       var socket = io();
       var message = $('#m');
       var messages = $('#messages');
       var username = $('#username');
-
+      var feedback = $('#feedback');
       var send_username = $('#send_username');
       var send_message = $('#send_message');
 
+     
+      
+var timeout;
+
+function timeoutFunction() {
+    typing = false;
+    socket.emit("typing", false);
+    console.log("SSDFSDFSDFSDF");
+}
+
+message.keyup(function() {
+    console.log('happening');
+    typing = true;
+    socket.emit('typing');
+    clearTimeout(timeout);
+    timeout = setTimeout(timeoutFunction, 2000);
+});
+
+socket.on('typing', function(data) {
+    if (data) {
+        feedback.html(data.username + " is typing");
+    } else {
+        feedback.html(" ");
+    }
+});
       send_username.click(function () {
         socket.emit('change_username', { username: username.val() })
       });
@@ -103,7 +128,7 @@
         return false;
       });
 
-      //TODO: make sure messages from other users are displaying with their corresponding username
+      
       socket.on('new_message', function (data) {
 
         messages.append($('<li>').text(data.username + ": " + data.message));
