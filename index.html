@@ -1,57 +1,119 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Socket.IO chat</title>
-        <style>
-            * {margin: 0; padding: 0; box-sizing: border-box; }
-            body { font: 13px Helvetica, Arial;}
-            form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%;}
-            form input {border: 0; padding: 10px; width: 90%; margin-right: 0.5%;}
-            form button { width: 9%; background: rgb(130,22,255); border: none; padding: 10px; }
-            #messages { list-style-type: none; margin: 0; padding: 0;}
-            #messages li { padding: 5px 10px; }
-            #messages li:nth-child(odd) { background: #eee; }
 
-        </style>
-    </head>
-    <body>
-        <ul id="messages"></ul>
-        <form action="">
-            <input id="m" autocomplete = "off"/><button>Send</button>
-        </form>
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<head>
+  <title>Socket.IO chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        <!-- jQuery library -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    body {
+      font: 13px Helvetica, Arial;
+    }
 
-        <!-- Latest compiled JavaScript -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
 
-        <script>
-            $(window).on('load', function(){
-                $('#myModal').modal('show');
-            });
-            $(function (){
-                var socket = io();
-                $('form').submit(function(e) {
-                    e.preventDefault();
-                    socket.emit('chat message',  $('#m').val());
-                    $('#m').val('');
-                    return false;
-                });
-                socket.on('chat message', function(msg){
-                    let username = document.getElementById("usernameInput").value;
-                    $('#messages').append($('<li>').text(username + ": " + msg));
-                });
-            });
-        </script>
-        
-<div id="myModal" class="modal fade" role="dialog">
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: 0.5%;
+    }
+
+    form button {
+      width: 9%;
+      background: rgb(130, 22, 255);
+      border: none;
+      padding: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <form action="">
+    <input id="m" autocomplete="off" /><button id="send_message">Send</button>
+  </form>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <script>
+    var $canvas = $('#canvas'),
+      $window = $(window);
+
+    $canvas.attr({
+      width: $window.width(),
+      height: $window.height()
+    });
+
+
+    $(window).on('load', function () {
+      $('#myModal').modal('show');
+    });
+    $(function () {
+
+      var socket = io();
+      var message = $('#m');
+      var messages = $('#messages');
+      var username = $('#username');
+
+      var send_username = $('#send_username');
+      var send_message = $('#send_message');
+
+      send_username.click(function () {
+        socket.emit('change_username', { username: username.val() })
+      });
+
+      $('form').submit(function (e) {
+        e.preventDefault();
+        socket.emit('new_message', { message: message.val() });
+        message.val('');
+        return false;
+      });
+
+      //TODO: make sure messages from other users are displaying with their corresponding username
+      socket.on('new_message', function (data) {
+
+        messages.append($('<li>').text(data.username + ": " + data.message));
+      });
+    });
+  </script>
+
+  <div id="myModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
-  
+
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header">
@@ -60,24 +122,15 @@
         </div>
         <div class="modal-body">
           <p>please enter Username</p>
-          <input type="text" id="usernameInput">
+          <input type="text" id="username">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal" onclick="assignToUser();">Close</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal" id="send_username">Close</button>
         </div>
       </div>
-  
+
     </div>
   </div>
-  <script>
-      function assignToUser(){
-         let username = document.getElementById("usernameInput").value;
-         var socket = io();
-         socket.emit('chat message', "Welcome " + username);
-      }
-  </script>
-
-
-    </body>
+</body>
 
 </html>
