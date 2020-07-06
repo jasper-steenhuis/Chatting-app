@@ -4,7 +4,6 @@ var io = require('socket.io')(http);
 var os = require('os');
 var interfaces = os.networkInterfaces();
 var addresses = [];
-const random = require('./RandomNameGenerator');
 
 
 for (var k in interfaces) {
@@ -23,9 +22,8 @@ app.get('/', (req,res) => {
 });
 io.on('connection', (socket) =>{
     socket.on('chat message', (msg) => {
-    io.emit('chat message', msg)    
+    io.emit('chat message', msg);    
     });
-    socket.emit('chat message',random.randomName);
 });
 io.on('disconnect',() => {
     console.log('user disconnected');

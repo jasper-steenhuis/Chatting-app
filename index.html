@@ -21,20 +21,63 @@
         </form>
         <script src="/socket.io/socket.io.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
         <script>
+            $(window).on('load', function(){
+                $('#myModal').modal('show');
+            });
             $(function (){
                 var socket = io();
                 $('form').submit(function(e) {
                     e.preventDefault();
-                    socket.emit('chat message', $('#m').val());
+                    socket.emit('chat message',  $('#m').val());
                     $('#m').val('');
                     return false;
                 });
                 socket.on('chat message', function(msg){
-                    $('#messages').append($('<li>').text(msg));
+                    let username = document.getElementById("usernameInput").value;
+                    $('#messages').append($('<li>').text(username + ": " + msg));
                 });
             });
         </script>
+        
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+  
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Username</h4>
+        </div>
+        <div class="modal-body">
+          <p>please enter Username</p>
+          <input type="text" id="usernameInput">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick="assignToUser();">Close</button>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+  <script>
+      function assignToUser(){
+         let username = document.getElementById("usernameInput").value;
+         var socket = io();
+         socket.emit('chat message', "Welcome " + username);
+      }
+  </script>
+
+
     </body>
 
 </html>
